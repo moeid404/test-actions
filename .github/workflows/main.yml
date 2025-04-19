@@ -1,23 +1,28 @@
-name: Parallel CI Test
+name: CI with Artifact Upload
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [ master ]
 
 jobs:
-  run-script-1:
+  build-and-upload:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Run script1
-        run: python3 script1.py
+      - name: Create artifact file using Python
+        run: |
+          echo 'print("Hello from Artifact")' > script.py
+          python3 script.py > output.txt
+          echo "This is a test artifact." >> output.txt
 
-  run-script-2:
-    # needs: run-script-1ss
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: List files
+        run: ls -la
 
-      - name: Run script2
-        run: python3 script2.py
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-output
+          path: output.txt
