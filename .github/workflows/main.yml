@@ -15,7 +15,7 @@ jobs:
         run: python3 script1.py
 
   run-script-2:
-    needs: run-script-1
+    # needs: run-script-1
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
