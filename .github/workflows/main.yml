@@ -1,28 +1,30 @@
-name: CI with Artifact Upload
+name: CI with Shared Output
 
 on:
   push:
     branches: [ master ]
 
 jobs:
-  build-and-upload:
+  list-dir:
     runs-on: ubuntu-latest
-
+    outputs:
+      dir_content: ${{ steps.save_output.outputs.dir_content }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Create artifact file using Python
+      - name: List files and export to output
+        id: save_output
         run: |
-          echo 'print("Hello from Artifact")' > script.py
-          python3 script.py > output.txt
-          echo "This is a test artifact." >> output.txt
+          DIR_OUTPUT="$(ls -la)"
+          echo "dir_content<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIR_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: List files
-        run: ls -la
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-output
-          path: output.txt
+  echo-dir:
+    needs: list-dir
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo directory output from previous job
+        run: |
+          echo "${{ needs.list-dir.outputs.dir_content }}"
